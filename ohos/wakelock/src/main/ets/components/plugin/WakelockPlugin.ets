@@ -2,8 +2,10 @@ import {
   AbilityAware,
   AbilityPluginBinding,
   FlutterPlugin,
-  FlutterPluginBinding,
 } from '@ohos/flutter_ohos';
+import { 
+  FlutterPluginBinding, 
+} from '@ohos/flutter_ohos/src/main/ets/embedding/engine/plugins/FlutterPlugin';
 import { IsEnabledMessage, ToggleMessage, WakelockApi } from './WakelockApi';
 import window from '@ohos.window';
 import { Context } from '@ohos.abilityAccessCtrl';
