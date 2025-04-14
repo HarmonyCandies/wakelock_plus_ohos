@@ -1,6 +1,6 @@
 name: wakelock_plus_ohos
 description: The OpenHarmony implementation of wakelock_plus.
-version: 0.0.2
+version: 0.0.3
 repository: https://github.com/harmonycandies/wakelock_plus_ohos
 topics:
   - wakelock

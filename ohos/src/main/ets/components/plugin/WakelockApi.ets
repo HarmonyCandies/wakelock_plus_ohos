@@ -191,5 +191,52 @@ export abstract class WakelockApi {
         channel.setMessageHandler(null);
       }
     }
+    {
+      let channel: BasicMessageChannel<Object> =
+        new BasicMessageChannel(
+          binaryMessenger, 'dev.flutter.pigeon.wakelock_plus_platform_interface.WakelockPlusApi.toggle', WakelockApi.getCodec());
+      if (api != null) {
+        channel.setMessageHandler({
+          async onMessage(message: Object, reply: Reply<Object>) {
+            let args: Array<Object> = message as Array<Object>;
+            let res: Array<Object> = [];
+            try {
+              await api!.toggle(args[0] as ToggleMessage);
+              res.push(null);
+            }
+            catch (error) {
+              let wrappedError: Array<Object> = wrapError(error);
+              res = wrappedError;
+            }
+            reply.reply(res);
+          }
+        });
+      } else {
+        channel.setMessageHandler(null);
+      }
+    }
+    {
+      let channel: BasicMessageChannel<Object> =
+        new BasicMessageChannel(
+          binaryMessenger, "dev.flutter.pigeon.wakelock_plus_platform_interface.WakelockPlusApi.isEnabled", WakelockApi.getCodec());
+      if (api != null) {
+        channel.setMessageHandler({
+          async onMessage(message: Object, reply: Reply<Object>) {
+            let res: Array<ESObject> = [];
+            try {
+              let output: IsEnabledMessage = await api!.isEnabled();
+              res.push(output);
+            }
+            catch (error) {
+              let wrappedError: Array<Object> = wrapError(error);
+              res = wrappedError;
+            }
+            reply.reply(res);
+          }
+        });
+      } else {
+        channel.setMessageHandler(null);
+      }
+    }
   }
 }
