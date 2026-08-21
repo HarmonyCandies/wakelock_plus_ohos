@@ -4,7 +4,7 @@ import {
   FlutterPlugin,
   FlutterPluginBinding,
 } from '@ohos/flutter_ohos';
-import { IsEnabledMessage, ToggleMessage, WakelockApi } from './WakelockApi';
+import { FlutterError, IsEnabledMessage, ToggleMessage, WakelockApi } from './WakelockApi';
 import window from '@ohos.window';
 import { Context } from '@ohos.abilityAccessCtrl';
 import runningLock from '@ohos.runningLock';
@@ -29,45 +29,46 @@ export default class WakelockPlugin extends WakelockApi implements FlutterPlugin
   }
 
 
+  /**
+   * Pigeon reports host failures by throwing; WakelockApi.setup wraps the
+   * rejection via wrapError so Dart sees a PlatformException.
+   */
+  private requireAbilityContext(): Context {
+    const context = this.context;
+    if (context == null) {
+      throw new FlutterError(
+        'no-ability-context',
+        'NoAbilityContextException',
+        'wakelock requires an attached ability context',
+        ''
+      );
+    }
+    return context;
+  }
+
   async toggle(msg: ToggleMessage): Promise<void> {
+    const context = this.requireAbilityContext();
+    let windowClass = await window.getLastWindow(context);
+    await windowClass.setWindowKeepScreenOn(msg.getEnable());
 
-    try {
-
-      if (this.context != null) {
-        let windowClass = await window.getLastWindow(this.context);
-        await windowClass.setWindowKeepScreenOn(msg.getEnable());
-      }
-
-      // let isSupported = runningLock.isSupported(runningLock.RunningLockType.BACKGROUND);
-      // if (!isSupported) {
-      //   return;
-      // }
-      // this.lock?.unhold();
-      // this.lock = null;
-      //
-      // if (msg.getEnable()) {
-      //   this.lock = await runningLock.create('wakelock', runningLock.RunningLockType.BACKGROUND);
-      //   this.lock?.hold(1000);
-      // }
-    }
-    catch (err) {
-      console.error('toggle failed, err: ' + err);
-    }
+    // let isSupported = runningLock.isSupported(runningLock.RunningLockType.BACKGROUND);
+    // if (!isSupported) {
+    //   return;
+    // }
+    // this.lock?.unhold();
+    // this.lock = null;
+    //
+    // if (msg.getEnable()) {
+    //   this.lock = await runningLock.create('wakelock', runningLock.RunningLockType.BACKGROUND);
+    //   this.lock?.hold(1000);
+    // }
   }
 
   async isEnabled(): Promise<IsEnabledMessage> {
-    let isEnabled = false;
-    try {
-      if (this.context != null) {
-        let windowClass = await window.getLastWindow(this.context);
-        isEnabled = isEnabled || await windowClass.getWindowProperties().isKeepScreenOn;
-      }
-      // isEnabled = isEnabled || (this.lock?.isHolding() ?? false);
-    }
-    catch (err) {
-      console.error('toggle failed, err: ' + err);
-    }
-
+    const context = this.requireAbilityContext();
+    let windowClass = await window.getLastWindow(context);
+    let isEnabled = windowClass.getWindowProperties().isKeepScreenOn;
+    // isEnabled = isEnabled || (this.lock?.isHolding() ?? false);
     return new IsEnabledMessage(isEnabled);
   }
 
